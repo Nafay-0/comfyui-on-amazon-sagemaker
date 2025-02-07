@@ -44,7 +44,7 @@ Disconnect and connect again for updated group membership to take effects.
 ### Quick Start
 **Step 1** - Clone the project:
 ```bash
-git clone https://github.com/aws-samples/comfyui-on-amazon-sagemaker.git
+git clone https://github.com/Nafay-0/comfyui-on-amazon-sagemaker.git
 ```
 
 **Step 2** - Customize the following files (optional):
