@@ -45,11 +45,11 @@ done
 
 # download models that you want to include
 # stable-diffusion-xl-base-1.0 
-download_huggingface 'https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors' "${TARGET_DIR}/checkpoints"
+#download_huggingface 'https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors' "${TARGET_DIR}/checkpoints"
 
 # Flux Dev (fp8 checkpoint version)
 # Ref: https://comfyanonymous.github.io/ComfyUI_examples/flux/#flux-dev-1
-# download_huggingface 'https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors' "${TARGET_DIR}/checkpoints"
+download_huggingface 'https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors' "${TARGET_DIR}/checkpoints"
 
 # Flux Schnell (fp8 checkpoint version)
 # Ref: https://comfyanonymous.github.io/ComfyUI_examples/flux/#flux-schnell-1
