@@ -38,6 +38,24 @@ def update_seed(prompt_dict, seed=None):
                     prompt_dict[i]["inputs"]["seed"] = int(seed)
     return prompt_dict
 
+def update_image_dimensions(prompt_dict, width, height):
+    """
+    Update the image dimensions in the prompt dictionary for the latent image node.
+
+    Args:
+        prompt_dict (dict): The prompt dictionary containing the node information.
+        width (int): The new width value.
+        height (int): The new height value.
+
+    Returns:
+        dict: The updated prompt dictionary with the new image dimensions.
+    """
+    for node_id in prompt_dict:
+        node = prompt_dict[node_id]
+        if node.get("class_type") == "EmptySD3LatentImage" and "inputs" in node:
+            node["inputs"]["width"] = int(width)
+            node["inputs"]["height"] = int(height)
+    return prompt_dict
 
 def update_prompt_text(prompt_dict, positive_prompt, negative_prompt):
     """
@@ -65,7 +83,7 @@ def update_prompt_text(prompt_dict, positive_prompt, negative_prompt):
     return prompt_dict
 
 
-def invoke_from_prompt(prompt_file, positive_prompt, negative_prompt, seed=None):
+def invoke_from_prompt(prompt_file, positive_prompt, negative_prompt, seed=None,  width=1024, height=1024 ):
     """
     Invokes the SageMaker endpoint with the provided prompt data.
 
@@ -74,6 +92,8 @@ def invoke_from_prompt(prompt_file, positive_prompt, negative_prompt, seed=None)
         positive_prompt (str): The positive prompt to be used in the prompt data.
         negative_prompt (str): The negative prompt to be used in the prompt data.
         seed (int, optional): The seed value for randomization. Defaults to None.
+        width (int, optional): The width of the output image. Defaults to 1024.
+        height (int, optional): The height of the output image. Defaults to 1024.
 
     Returns:
         dict: The response from the SageMaker endpoint.
@@ -90,6 +110,7 @@ def invoke_from_prompt(prompt_file, positive_prompt, negative_prompt, seed=None)
     prompt_dict = json.loads(prompt_text)
     prompt_dict = update_seed(prompt_dict, seed)
     prompt_dict = update_prompt_text(prompt_dict, positive_prompt, negative_prompt)
+    prompt_dict = update_image_dimensions(prompt_dict, width, height)
     prompt_text = json.dumps(prompt_dict)
 
     endpoint_name = os.environ["ENDPOINT_NAME"]
@@ -126,12 +147,16 @@ def lambda_handler(event: dict, context: dict):
         prompt_file = request.get("prompt_file", "workflow_api.json")
         positive_prompt = request["positive_prompt"]
         negative_prompt = request.get("negative_prompt", "")
+        width = request.get("width", 1024)
+        height = request.get("height", 1024)
         seed = request.get("seed")
         response = invoke_from_prompt(
             prompt_file=prompt_file,
             positive_prompt=positive_prompt,
             negative_prompt=negative_prompt,
             seed=seed,
+            width=width,
+            height=height,
         )
     except KeyError as e:
         logger.error(f"Error: {e}")
