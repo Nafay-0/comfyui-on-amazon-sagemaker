@@ -51,6 +51,8 @@ download_huggingface 'https://huggingface.co/stabilityai/stable-diffusion-xl-bas
 # Ref: https://comfyanonymous.github.io/ComfyUI_examples/flux/#flux-dev-1
 download_huggingface 'https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors' "${TARGET_DIR}/checkpoints"
 
+
+download_huggingface 'https://huggingface.co/SG161222/RealVisXL_V4.0/blob/main/RealVisXL_V4.0.safetensors' "${TARGET_DIR}/checkpoints"
 # Flux Schnell (fp8 checkpoint version)
 # Ref: https://comfyanonymous.github.io/ComfyUI_examples/flux/#flux-schnell-1
 # download_huggingface 'https://huggingface.co/Comfy-Org/flux1-schnell/resolve/main/flux1-schnell-fp8.safetensors' "${TARGET_DIR}/checkpoints"
