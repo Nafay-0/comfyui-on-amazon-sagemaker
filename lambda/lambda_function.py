@@ -55,6 +55,10 @@ def update_image_dimensions(prompt_dict, width, height):
         if node.get("class_type") == "EmptySD3LatentImage" and "inputs" in node:
             node["inputs"]["width"] = int(width)
             node["inputs"]["height"] = int(height)
+
+        if node.get("class_type") == "EmptyLatentImage" and "inputs" in node:
+            node["inputs"]["width"] = int(width)
+            node["inputs"]["height"] = int(height)
     return prompt_dict
 
 def update_prompt_text(prompt_dict, positive_prompt, negative_prompt):
