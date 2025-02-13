@@ -10,9 +10,13 @@ set -u # Exit on undefined variable
 download_huggingface() {
     # first wget with --no-clobber, then wget with --timestamping
     wget -nc "$1" -P "$2" || wget -N "$1" -P "$2"
-    # wget --header="Authorization: Bearer ${HF_TOKEN}" -nc "$1" -P "$2" || wget --header="Authorization: Bearer ${HF_TOKEN}" -N "$1" -P "$2"
-}
 
+    # Rename the downloaded file to the new specified filename
+    local downloaded_file="${2}/$(basename $1)"
+    if [ -e "$downloaded_file" ]; then
+        mv "$downloaded_file" "${2}/$3"
+    fi
+}
 # target folder for downloading model artifact
 TARGET_DIR="model-artifact"
 
@@ -44,6 +48,11 @@ do
 done
 
 # download models that you want to include
+
+download_huggingface 'https://civitai.com/api/download/models/1408658?type=Model&format=SafeTensor&size=full&fp=fp16' "${TARGET_DIR}/checkpoints" "AnImageinXL40.safetensors"
+
+download_huggingface 'https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors' "${TARGET_DIR}/checkpoints" "StableDiffusionXL.safetensors"
+
 # stable-diffusion-xl-base-1.0 
 #download_huggingface 'https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors' "${TARGET_DIR}/checkpoints"
 
@@ -53,7 +62,7 @@ done
 
 #download_huggingface 'https://huggingface.co/SG161222/RealVisXL_V4.0/resolve/main/RealVisXL_V4.0.safetensors' "${TARGET_DIR}/checkpoints"
 
-download_huggingface 'https://civitai.com/api/download/models/1408658?type=Model&format=SafeTensor&size=full&fp=fp16' "${TARGET_DIR}/checkpoints"
+# download_huggingface 'https://civitai.com/api/download/models/1408658?type=Model&format=SafeTensor&size=full&fp=fp16' "${TARGET_DIR}/checkpoints"
 
 # Flux Schnell (fp8 checkpoint version)
 # Ref: https://comfyanonymous.github.io/ComfyUI_examples/flux/#flux-schnell-1

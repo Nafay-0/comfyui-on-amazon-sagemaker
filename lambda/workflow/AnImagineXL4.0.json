@@ -31,7 +31,7 @@
     },
     "4": {
       "inputs": {
-        "ckpt_name": "animagineXL40_v4Opt.safetensors"
+        "ckpt_name": "AnImageinXL40.safetensors"
       },
       "class_type": "CheckpointLoaderSimple",
       "_meta": {
