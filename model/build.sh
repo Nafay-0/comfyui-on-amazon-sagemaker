@@ -53,6 +53,12 @@ download_huggingface 'https://civitai.com/api/download/models/1408658?type=Model
 
 download_huggingface 'https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors' "${TARGET_DIR}/checkpoints" "StableDiffusionXL.safetensors"
 
+download_huggingface 'https://huggingface.co/SG161222/RealVisXL_V4.0/resolve/main/RealVisXL_V4.0.safetensors' "${TARGET_DIR}/checkpoints" "RealVisXL_V4.0.safetensors"
+
+#
+#download_huggingface 'https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors' "${TARGET_DIR}/checkpoints" "flux1-dev-fp8.safetensors"
+
+
 # stable-diffusion-xl-base-1.0 
 #download_huggingface 'https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors' "${TARGET_DIR}/checkpoints"
 
@@ -60,7 +66,7 @@ download_huggingface 'https://huggingface.co/stabilityai/stable-diffusion-xl-bas
 # Ref: https://comfyanonymous.github.io/ComfyUI_examples/flux/#flux-dev-1
 #download_huggingface 'https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors' "${TARGET_DIR}/checkpoints"
 
-#download_huggingface 'https://huggingface.co/SG161222/RealVisXL_V4.0/resolve/main/RealVisXL_V4.0.safetensors' "${TARGET_DIR}/checkpoints"
+
 
 # download_huggingface 'https://civitai.com/api/download/models/1408658?type=Model&format=SafeTensor&size=full&fp=fp16' "${TARGET_DIR}/checkpoints"
 
