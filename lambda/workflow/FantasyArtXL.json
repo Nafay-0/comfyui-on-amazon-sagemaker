@@ -1,7 +1,7 @@
 {
   "6": {
     "inputs": {
-      "text": "Realistic image of woman with red hair",
+      "text": "POSITIVE_PROMT_PLACEHOLDER",
       "clip": [
         "34",
         1
@@ -75,7 +75,7 @@
   },
   "33": {
     "inputs": {
-      "text": "blur low quality low resolution",
+      "text": "NEGATIVE_PROMPT_PLACEHOLDER",
       "clip": [
         "34",
         1
