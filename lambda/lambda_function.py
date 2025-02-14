@@ -103,6 +103,7 @@ def update_prompt_text(prompt_dict, positive_prompt, negative_prompt):
                     prompt_dict[i]["inputs"]["text"] = negative_prompt
     return prompt_dict
 
+
 def update_tensors_file_name(prompt_dict, tensors_file_name):
     # node name CheckpointLoaderSimple
     if tensors_file_name is None:
@@ -117,8 +118,9 @@ def update_tensors_file_name(prompt_dict, tensors_file_name):
                 prompt_dict[i]["inputs"]["ckpt_name"] = tensors_file_name
     return prompt_dict
 
+
 def invoke_from_prompt(prompt_file, positive_prompt, negative_prompt, seed=None, width=1024, height=1024,
-                          steps=20, denoise=1, cfg=8, sampler_name="euler", tensors_file_name=None):
+                       steps=20, denoise=1, cfg=8, sampler_name="euler", tensors_file_name=None):
     """
     Invokes the SageMaker endpoint with the provided prompt data.
 
@@ -204,7 +206,7 @@ def lambda_handler(event: dict, context: dict):
             denoise=denoise,
             cfg=cfg,
             sampler_name=sampler_name,
-            tensors_file_name = tensors_file_name
+            tensors_file_name=tensors_file_name
         )
     except KeyError as e:
         logger.error(f"Error: {e}")
