@@ -42,7 +42,7 @@
   },
   "30": {
     "inputs": {
-      "ckpt_name": "flux1-dev-fp8.safetensors"
+      "ckpt_name": "fluxD.safetensors"
     },
     "class_type": "CheckpointLoaderSimple"
   },
