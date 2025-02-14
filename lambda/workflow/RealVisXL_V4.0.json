@@ -31,7 +31,7 @@
     },
     "4": {
       "inputs": {
-        "ckpt_name": "RealVisXL_V4.0.safetensors"
+        "ckpt_name": "RealVisXL_V40.safetensors"
       },
       "class_type": "CheckpointLoaderSimple",
       "_meta": {
