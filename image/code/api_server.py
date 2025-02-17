@@ -71,7 +71,8 @@ def invocations():
     if prompt.get("input_image"):
         image_data = prompt["input_image"]
         image_data = image_data.encode("utf-8") if isinstance(image_data, str) else image_data
-        upload_image_from(image_data, "input.png", SERVER_ADDRESS)
+        res = upload_image_from(image_data, "input.png", SERVER_ADDRESS)
+        print(res)
         # remove input_image from prompt
         prompt.pop("input_image")
 
