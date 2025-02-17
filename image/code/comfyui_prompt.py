@@ -9,8 +9,10 @@ import uuid
 import json
 import urllib.request
 import urllib.parse
-
 from requests_toolbelt import MultipartEncoder
+import urllib.request
+import requests
+import io
 
 server_address = "127.0.0.1:8188"
 
@@ -109,23 +111,42 @@ def prompt_for_image_data(ws, client_id, prompt):
 
 
 def upload_image_from_s3_url(s3_url, name, server_address, image_type="input", overwrite=False):
-    response = requests.get(s3_url)
-    response.raise_for_status()
-    file_content = response.content
+    """
+    Downloads an image from an S3 URL and uploads it as a multipart request.
 
+    Args:
+        s3_url (str): The S3 URL of the image.
+        name (str): The name to assign to the uploaded image.
+        server_address (str): The server endpoint for uploading images.
+        image_type (str, optional): The type of image. Defaults to "input".
+        overwrite (bool, optional): Whether to overwrite the image if it exists. Defaults to False.
+
+    Returns:
+        str: The response from the server.
+    """
+
+    # Step 1: Download the image from S3 URL
+    response = requests.get(s3_url)
+    response.raise_for_status()  # Raise an error if the download fails
+    file_content = io.BytesIO(response.content)  # Convert to file-like object
+
+    # Step 2: Prepare multipart form data
     multipart_data = MultipartEncoder(
         fields={
-            'image': (name, file_content, 'image/png'),
+            'image': (name, file_content, 'image/png'),  # Change MIME type if needed
             'type': image_type,
             'overwrite': str(overwrite).lower()
         }
     )
 
-    data = multipart_data
+    # Step 3: Send POST request
+    upload_url = f"http://{server_address}/upload/image"  # Ensure this endpoint is correct
     headers = {'Content-Type': multipart_data.content_type}
-    request = urllib.request.Request("http://{}/upload/image".format(server_address), data=data, headers=headers)
-    with urllib.request.urlopen(request) as response:
-        return response.read()
+
+    req = urllib.request.Request(upload_url, data=multipart_data, headers=headers)
+    with urllib.request.urlopen(req) as response:
+        return response.read().decode('utf-8')  # Decode response if it's in bytes
+
 
 prompt_text = """
 {
