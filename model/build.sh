@@ -51,15 +51,15 @@ done
 
 #download_huggingface 'https://civitai.com/api/download/models/1408658?type=Model&format=SafeTensor&size=full&fp=fp16' "${TARGET_DIR}/checkpoints" "AnImageinXL40.safetensors"
 
-#download_huggingface 'https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors' "${TARGET_DIR}/checkpoints" "StableDiffusionXL.safetensors"
+download_huggingface 'https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors' "${TARGET_DIR}/checkpoints" "StableDiffusionXL.safetensors"
 
 #download_huggingface 'https://huggingface.co/SG161222/RealVisXL_V4.0/resolve/main/RealVisXL_V4.0.safetensors' "${TARGET_DIR}/checkpoints" "RealVisXL_V40.safetensors"
 
 #download_huggingface 'https://civitai.com/api/download/models/133805?type=Model&format=SafeTensor' "${TARGET_DIR}/loras" "FantasyArtXL.safetensors"
 
-download_huggingface 'https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors' "${TARGET_DIR}/checkpoints" "fluxD.safetensors"
+#download_huggingface 'https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors' "${TARGET_DIR}/checkpoints" "fluxD.safetensors"
 
-download_huggingface 'https://drive.usercontent.google.com/u/0/uc?id=1Tqhh4hgZmcRi60zTtQlopSmCvFYrPbLP&export=download' "${TARGET_DIR}/loras" "fluxDLora.safetensors"
+#download_huggingface 'https://drive.usercontent.google.com/u/0/uc?id=1Tqhh4hgZmcRi60zTtQlopSmCvFYrPbLP&export=download' "${TARGET_DIR}/loras" "fluxDLora.safetensors"
 
 
 

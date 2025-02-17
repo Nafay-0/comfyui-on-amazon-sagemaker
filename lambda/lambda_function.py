@@ -120,11 +120,17 @@ def update_tensors_file_name(prompt_dict, tensors_file_name):
 
 
 def invoke_from_prompt(prompt_file, positive_prompt, negative_prompt, seed=None, width=1024, height=1024,
-                       steps=20, denoise=1, cfg=8, sampler_name="euler", tensors_file_name=None):
+                       steps=20, denoise=1, cfg=8, sampler_name="euler", tensors_file_name=None, image_input=None):
     """
     Invokes the SageMaker endpoint with the provided prompt data.
 
     Args:
+        image_input:  The image input to be used in the prompt data.
+        tensors_file_name:  The tensors file name to be used in the prompt data.
+        sampler_name:  The sampler name to be used in the prompt data.
+        cfg:  The cfg value to be used in the prompt data.
+        denoise:  The denoise value to be used in the prompt data.
+        steps:  The steps value to be used in the prompt data.
         prompt_file (str): The path to the JSON file in ./workflow/ containing the prompt data.
         positive_prompt (str): The positive prompt to be used in the prompt data.
         negative_prompt (str): The negative prompt to be used in the prompt data.
@@ -143,8 +149,9 @@ def invoke_from_prompt(prompt_file, positive_prompt, negative_prompt, seed=None,
     # read the prompt data from json file
     with open("./workflow/" + prompt_file) as prompt_file:
         prompt_text = prompt_file.read()
-
     prompt_dict = json.loads(prompt_text)
+    if image_input:
+        prompt_dict["input_image"] = image_input
     prompt_dict = update_seed(prompt_dict, seed)
     prompt_dict = update_prompt_text(prompt_dict, positive_prompt, negative_prompt)
     prompt_dict = update_image_dimensions(prompt_dict, width, height)
@@ -186,6 +193,7 @@ def lambda_handler(event: dict, context: dict):
         prompt_file = request.get("prompt_file", "SDXL.json")
         positive_prompt = request["positive_prompt"]
         negative_prompt = request.get("negative_prompt", "")
+        image_input = request.get("image_input", None)
         width = request.get("width", 1024)
         height = request.get("height", 1024)
         seed = request.get("seed")
@@ -206,7 +214,8 @@ def lambda_handler(event: dict, context: dict):
             denoise=denoise,
             cfg=cfg,
             sampler_name=sampler_name,
-            tensors_file_name=tensors_file_name
+            tensors_file_name=tensors_file_name,
+            image_input=image_input,
         )
     except KeyError as e:
         logger.error(f"Error: {e}")

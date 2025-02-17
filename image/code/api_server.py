@@ -4,7 +4,7 @@ import requests
 import flask
 import websocket  # Note: websocket-client (https://github.com/websocket-client/websocket-client)
 import uuid
-from comfyui_prompt import prompt_for_image_data
+from comfyui_prompt import prompt_for_image_data, upload_image_from_s3_url
 from PIL import Image
 
 app = flask.Flask(__name__)
@@ -66,6 +66,12 @@ def invocations():
 
     # get prompt from request body regardless of content type
     prompt = flask.request.get_json(silent=True, force=True)
+
+    # if image input is provided, upload it to comfyui server
+    if prompt.get("input_image"):
+        image_url = prompt["input_image"]
+        upload_image_from_s3_url(image_url, "input.png", SERVER_ADDRESS)
+
     image_data = prompt_for_image_data(ws, client_id, prompt)
 
     # convert png to jpeg if it is allowed from accept header
