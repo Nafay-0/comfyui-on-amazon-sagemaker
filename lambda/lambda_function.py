@@ -5,9 +5,6 @@ import random
 import base64
 import io
 import os
-
-import requests
-
 # Define Logger
 logger = logging.getLogger()
 logging.basicConfig()
@@ -138,14 +135,17 @@ def get_image_from_url(url):
     Get the image data from the provided URL.
 
     Args:
-        url (str): The URL to fetch the image data from.
+        s3 url (str): The URL to fetch the image data from.
 
     Returns:
         bytes: The image data in bytes.
     """
-    response = requests.get(url)
-    response.raise_for_status()  # Raise an error if the download fails
-    file_content = io.BytesIO(response.content)  # Convert to file-like object
+    # fetch image from boto client s3 url
+    boto3_client = boto3.client("s3")
+    bucket_name = url.split("/")[2]
+    key = "/".join(url.split("/")[3:])
+    response = boto3_client.get_object(Bucket=bucket_name, Key=key)
+    file_content = io.BytesIO(response["Body"].read())
     return file_content
 
 
