@@ -110,12 +110,10 @@ def prompt_for_image_data(ws, client_id, prompt):
     return output_images
 
 
-def upload_image_from_s3_url(s3_url, name, server_address, image_type="input", overwrite=False):
+def upload_image_from(image_data, name, server_address, image_type="input", overwrite=False):
     """
-    Downloads an image from an S3 URL and uploads it as a multipart request.
-
     Args:
-        s3_url (str): The S3 URL of the image.
+        image_data (str): The data of image to upload.
         name (str): The name to assign to the uploaded image.
         server_address (str): The server endpoint for uploading images.
         image_type (str, optional): The type of image. Defaults to "input".
@@ -125,15 +123,10 @@ def upload_image_from_s3_url(s3_url, name, server_address, image_type="input", o
         str: The response from the server.
     """
 
-    # Step 1: Download the image from S3 URL
-    response = requests.get(s3_url)
-    response.raise_for_status()  # Raise an error if the download fails
-    file_content = io.BytesIO(response.content)  # Convert to file-like object
-
     # Step 2: Prepare multipart form data
     multipart_data = MultipartEncoder(
         fields={
-            'image': (name, file_content, 'image/png'),  # Change MIME type if needed
+            'image': (name, image_data, 'image/png'),  # Change MIME type if needed
             'type': image_type,
             'overwrite': str(overwrite).lower()
         }

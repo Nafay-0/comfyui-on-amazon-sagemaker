@@ -4,7 +4,7 @@ import requests
 import flask
 import websocket  # Note: websocket-client (https://github.com/websocket-client/websocket-client)
 import uuid
-from comfyui_prompt import prompt_for_image_data, upload_image_from_s3_url
+from comfyui_prompt import prompt_for_image_data, upload_image_from
 from PIL import Image
 
 app = flask.Flask(__name__)
@@ -69,8 +69,9 @@ def invocations():
 
     # if image input is provided, upload it to comfyui server
     if prompt.get("input_image"):
-        image_url = prompt["input_image"]
-        upload_image_from_s3_url(image_url, "input.png", SERVER_ADDRESS)
+        image_data = prompt["input_image"]
+        image_data = image_data.encode("utf-8") if isinstance(image_data, str) else image_data
+        upload_image_from(image_data, "input.png", SERVER_ADDRESS)
         # remove input_image from prompt
         prompt.pop("input_image")
 

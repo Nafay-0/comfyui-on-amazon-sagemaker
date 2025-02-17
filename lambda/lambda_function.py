@@ -6,6 +6,8 @@ import base64
 import io
 import os
 
+import requests
+
 # Define Logger
 logger = logging.getLogger()
 logging.basicConfig()
@@ -131,6 +133,22 @@ def update_tensors_file_name(prompt_dict, tensors_file_name):
     return prompt_dict
 
 
+def get_image_from_url(url):
+    """
+    Get the image data from the provided URL.
+
+    Args:
+        url (str): The URL to fetch the image data from.
+
+    Returns:
+        bytes: The image data in bytes.
+    """
+    response = requests.get(url)
+    response.raise_for_status()  # Raise an error if the download fails
+    file_content = io.BytesIO(response.content)  # Convert to file-like object
+    return file_content
+
+
 def invoke_from_prompt(prompt_file, positive_prompt, negative_prompt, seed=None, width=1024, height=1024,
                        steps=20, denoise=1, cfg=8, sampler_name="euler", tensors_file_name=None, image_input=None):
     """
@@ -162,14 +180,16 @@ def invoke_from_prompt(prompt_file, positive_prompt, negative_prompt, seed=None,
     with open("./workflow/" + prompt_file) as prompt_file:
         prompt_text = prompt_file.read()
     prompt_dict = json.loads(prompt_text)
-    if image_input:
-        prompt_dict["input_image"] = image_input
     prompt_dict = update_seed(prompt_dict, seed)
     prompt_dict = update_prompt_text(prompt_dict, positive_prompt, negative_prompt)
     prompt_dict = update_image_dimensions(prompt_dict, width, height)
     prompt_dict = update_Sampler_details(prompt_dict, steps, denoise, cfg, sampler_name)
     prompt_dict = update_tensors_file_name(prompt_dict, tensors_file_name)
-    prompt_text = json.dumps(prompt_dict)
+    if image_input:
+        url = image_input
+        image_data = get_image_from_url(url)
+        prompt_dict["input_image"] = base64.b64encode(image_data.getvalue()).decode("utf-8")
+    #prompt_text = json.dumps(prompt_dict)
 
     endpoint_name = os.environ["ENDPOINT_NAME"]
     content_type = "application/json"
