@@ -3,3 +3,4 @@ Flask
 requests
 websocket-client
 pillow
+requests-toolbelt
