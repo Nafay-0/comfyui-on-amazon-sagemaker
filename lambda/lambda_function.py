@@ -27,6 +27,9 @@ def update_seed(prompt_dict, seed=None):
     """
     # set seed for KSampler node
     for i in prompt_dict:
+        # if node is str skip
+        if isinstance(prompt_dict[i], str):
+            continue
         if "inputs" in prompt_dict[i]:
             if (
                     prompt_dict[i]["class_type"] == "KSampler"
@@ -53,6 +56,9 @@ def update_image_dimensions(prompt_dict, width, height):
     """
     for node_id in prompt_dict:
         node = prompt_dict[node_id]
+        # if node is str skip
+        if isinstance(node, str):
+            continue
         if node.get("class_type") == "EmptySD3LatentImage" and "inputs" in node:
             node["inputs"]["width"] = int(width)
             node["inputs"]["height"] = int(height)
@@ -65,6 +71,8 @@ def update_image_dimensions(prompt_dict, width, height):
 
 def update_Sampler_details(prompt_dict, steps=20, denoise=1, cfg=8, sampler_name="euler"):
     for i in prompt_dict:
+        if isinstance(prompt_dict[i], str):
+            continue
         if "inputs" in prompt_dict[i]:
             if (
                     prompt_dict[i]["class_type"] == "KSampler"
@@ -92,6 +100,8 @@ def update_prompt_text(prompt_dict, positive_prompt, negative_prompt):
     """
     # replace prompt text for CLIPTextEncode node
     for i in prompt_dict:
+        if isinstance(prompt_dict[i], str):
+            continue
         if "inputs" in prompt_dict[i]:
             if (
                     prompt_dict[i]["class_type"] == "CLIPTextEncode"
@@ -110,6 +120,8 @@ def update_tensors_file_name(prompt_dict, tensors_file_name):
         return prompt_dict
 
     for i in prompt_dict:
+        if isinstance(prompt_dict[i], str):
+            continue
         if "inputs" in prompt_dict[i]:
             if (
                     prompt_dict[i]["class_type"] == "CheckpointLoaderSimple"
