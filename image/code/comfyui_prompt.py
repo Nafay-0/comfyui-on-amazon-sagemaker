@@ -250,7 +250,7 @@ if __name__ == "__main__":
     print("\n\n")
 
     if prompt["input_image"]:
-        upload_image_from_s3_url(prompt["input_image"], "input_image.png", server_address, "input", overwrite=True)
+        upload_image_from(prompt["input_image"], "input_image.png", server_address, "input", overwrite=True)
         # remove from prompt
         prompt.pop("input_image")
 
