@@ -71,6 +71,8 @@ def invocations():
     if prompt.get("input_image"):
         image_url = prompt["input_image"]
         upload_image_from_s3_url(image_url, "input.png", SERVER_ADDRESS)
+        # remove input_image from prompt
+        prompt.pop("input_image")
 
     image_data = prompt_for_image_data(ws, client_id, prompt)
 
