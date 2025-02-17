@@ -1,12 +1,12 @@
 {
   "3": {
     "inputs": {
-      "seed": 156680208700286,
-      "steps": 22,
+      "seed": 539598540454239,
+      "steps": 30,
       "cfg": 8,
-      "sampler_name": "dpmpp_3m_sde",
-      "scheduler": "karras",
-      "denoise": 0.6,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "denoise": 0.8,
       "model": [
         "4",
         0
@@ -24,19 +24,13 @@
         0
       ]
     },
-    "class_type": "KSampler",
-    "_meta": {
-      "title": "KSampler"
-    }
+    "class_type": "KSampler"
   },
   "4": {
     "inputs": {
       "ckpt_name": "StableDiffusionXL.safetensors"
     },
-    "class_type": "CheckpointLoaderSimple",
-    "_meta": {
-      "title": "Load Checkpoint"
-    }
+    "class_type": "CheckpointLoaderSimple"
   },
   "6": {
     "inputs": {
@@ -46,10 +40,7 @@
         1
       ]
     },
-    "class_type": "CLIPTextEncode",
-    "_meta": {
-      "title": "CLIP Text Encode (Prompt)"
-    }
+    "class_type": "CLIPTextEncode"
   },
   "7": {
     "inputs": {
@@ -59,10 +50,7 @@
         1
       ]
     },
-    "class_type": "CLIPTextEncode",
-    "_meta": {
-      "title": "CLIP Text Encode (Prompt)"
-    }
+    "class_type": "CLIPTextEncode"
   },
   "8": {
     "inputs": {
@@ -75,10 +63,7 @@
         2
       ]
     },
-    "class_type": "VAEDecode",
-    "_meta": {
-      "title": "VAE Decode"
-    }
+    "class_type": "VAEDecode"
   },
   "9": {
     "inputs": {
@@ -88,20 +73,14 @@
         0
       ]
     },
-    "class_type": "SaveImage",
-    "_meta": {
-      "title": "Save Image"
-    }
+    "class_type": "SaveImage"
   },
   "10": {
     "inputs": {
       "image": "input.png",
       "upload": "image"
     },
-    "class_type": "LoadImage",
-    "_meta": {
-      "title": "Load Image"
-    }
+    "class_type": "LoadImage"
   },
   "11": {
     "inputs": {
@@ -114,9 +93,6 @@
         2
       ]
     },
-    "class_type": "VAEEncode",
-    "_meta": {
-      "title": "VAE Encode"
-    }
+    "class_type": "VAEEncode"
   }
 }
