@@ -81,8 +81,9 @@ def invocations():
         image_data = base64.b64decode(image_data)
         res = upload_image_from(image_data, file_name, SERVER_ADDRESS)
         logger.info(res)
-        prompt.pop("input_image")
-        prompt.pop("input_image_name")
+        # remove the fields input_image and input_image_name from prompt
+        del prompt["input_image"]
+        del prompt["input_image_name"]
     else:
         logger.info("No image recieved in the request")
     image_data = prompt_for_image_data(ws, client_id, prompt)
