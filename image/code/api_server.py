@@ -46,6 +46,19 @@ def ping():
     return flask.Response(response="\n", status=status, mimetype="application/json")
 
 
+def get_image_name(prompt_dict):
+    for i in prompt_dict:
+        if isinstance(prompt_dict[i], str):
+            continue
+        if "inputs" in prompt_dict[i]:
+            if (
+                    prompt_dict[i]["class_type"] == "LoadImage"
+                    and "image" in prompt_dict[i]["inputs"]
+            ):
+                return prompt_dict[i]["inputs"]["image"]
+    return None
+
+
 @app.route("/invocations", methods=["POST"])
 def invocations():
     """
@@ -77,13 +90,13 @@ def invocations():
     if prompt.get("input_image"):
         logger.info("Image recieved in the request")
         image_data = prompt["input_image"]
-        file_name = prompt["input_image_name"]
+
         image_data = base64.b64decode(image_data)
-        res = upload_image_from(image_data, file_name, SERVER_ADDRESS)
+        filename = get_image_name(prompt)
+        res = upload_image_from(image_data, filename, SERVER_ADDRESS)
         logger.info(res)
-        # remove the fields input_image and input_image_name from prompt
-        del prompt["input_image"]
-        del prompt["input_image_name"]
+        # remove the fields input_image  from prompt
+        prompt.pop("input_image")
     else:
         logger.info("No image recieved in the request")
     image_data = prompt_for_image_data(ws, client_id, prompt)
