@@ -126,7 +126,7 @@ def upload_image_from(image_data, name, server_address, image_type="input", over
     # Step 2: Prepare multipart form data
     multipart_data = MultipartEncoder(
         fields={
-            'image': (name, image_data, 'image/png'),  # Change MIME type if needed
+            'image': (name, image_data, 'image/jpg'),
             'type': image_type,
             'overwrite': True
         }
