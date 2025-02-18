@@ -130,6 +130,23 @@ def update_tensors_file_name(prompt_dict, tensors_file_name):
     return prompt_dict
 
 
+def update_input_image_name(prompt_dict, input_image_name):
+    # node name CheckpointLoaderSimple
+    if input_image_name is None:
+        return prompt_dict
+
+    for i in prompt_dict:
+        if isinstance(prompt_dict[i], str):
+            continue
+        if "inputs" in prompt_dict[i]:
+            if (
+                    prompt_dict[i]["class_type"] == "LoadImage"
+                    and "image" in prompt_dict[i]["inputs"]
+            ):
+                prompt_dict[i]["inputs"]["image"] = input_image_name
+    return prompt_dict
+
+
 def get_image_from_url(url):
     """
     Get the image data from the provided URL.
@@ -191,7 +208,9 @@ def invoke_from_prompt(prompt_file, positive_prompt, negative_prompt, seed=None,
         image_data, file_name = get_image_from_url(url)
         # add a new field to the prompt_dict
         prompt_dict["input_image"] = base64.b64encode(image_data.getvalue()).decode("utf-8")
-        prompt_dict["file_name"] = file_name
+        prompt_dict["input_image_name"] = file_name
+        prompt_dict = update_input_image_name(prompt_dict, file_name)
+
     prompt_text = json.dumps(prompt_dict)
 
     endpoint_name = os.environ["ENDPOINT_NAME"]
