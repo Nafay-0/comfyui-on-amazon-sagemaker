@@ -126,9 +126,9 @@ def upload_image_from(image_data, name, server_address, image_type="input", over
     # Step 2: Prepare multipart form data
     multipart_data = MultipartEncoder(
         fields={
-            'image': (name, image_data, 'image/png'),
+            'image': (name, image_data, 'image/png'),  # Change MIME type if needed
             'type': image_type,
-            'overwrite': True
+            'overwrite': str(overwrite).lower()
         }
     )
 
@@ -139,6 +139,7 @@ def upload_image_from(image_data, name, server_address, image_type="input", over
     req = urllib.request.Request(upload_url, data=multipart_data, headers=headers)
     with urllib.request.urlopen(req) as response:
         return response.read().decode('utf-8')  # Decode response if it's in bytes
+
 
 
 prompt_text = """

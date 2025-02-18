@@ -88,7 +88,7 @@ def invocations():
 
     # if image input is provided, upload it to comfyui server
     if prompt.get("input_image"):
-        logger.info("Image recieved in the request")
+        logger.info("Image received in the request")
         image_data = prompt["input_image"]
 
         image_data = base64.b64decode(image_data)

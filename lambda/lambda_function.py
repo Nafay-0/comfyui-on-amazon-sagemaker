@@ -5,6 +5,7 @@ import random
 import base64
 import io
 import os
+
 # Define Logger
 logger = logging.getLogger()
 logging.basicConfig()
@@ -271,7 +272,6 @@ def lambda_handler(event: dict, context: dict):
             "image_input": image_input,
         }
         logger.info("Payload to send", payload_to_send)
-
 
         response = invoke_from_prompt(
             prompt_file=prompt_file,
