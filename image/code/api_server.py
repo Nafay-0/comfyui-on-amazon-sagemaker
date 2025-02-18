@@ -92,7 +92,7 @@ def invocations():
         image_data = prompt["input_image"]
 
         image_data = base64.b64decode(image_data)
-        filename = get_image_name(prompt)
+        filename = "input1.png"
         res = upload_image_from(image_data, filename, SERVER_ADDRESS)
         logger.info(res)
         # remove the fields input_image  from prompt
