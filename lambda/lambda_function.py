@@ -196,7 +196,7 @@ def invoke_from_prompt(prompt_file, positive_prompt, negative_prompt, seed=None,
     content_type = "application/json"
     accept = "*/*"
     payload = prompt_text
-    logger.info("Final payload to invoke sagemaker:")
+    logger.info("Final payload to invoke sagemaker:", payload)
     logger.info(json.dumps(payload, indent=4))
     response = sagemaker_client.invoke_endpoint(
         EndpointName=endpoint_name,
@@ -235,6 +235,22 @@ def lambda_handler(event: dict, context: dict):
         cfg = request.get("cfg", 8)
         sampler_name = request.get("sampler_name", "euler")
         tensors_file_name = request.get("tensors_file_name", None)
+        payload_to_send = {
+            "prompt_file": prompt_file,
+            "positive_prompt": positive_prompt,
+            "negative_prompt": negative_prompt,
+            "seed": seed,
+            "width": width,
+            "height": height,
+            "steps": steps,
+            "denoise": denoise,
+            "cfg": cfg,
+            "sampler_name": sampler_name,
+            "tensors_file_name": tensors_file_name,
+            "image_input": image_input,
+        }
+        logger.info("Payload to send", payload_to_send)
+
 
         response = invoke_from_prompt(
             prompt_file=prompt_file,

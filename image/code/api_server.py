@@ -1,4 +1,5 @@
 import base64
+import logging
 import io
 import os
 import requests
@@ -8,6 +9,10 @@ import uuid
 from comfyui_prompt import prompt_for_image_data, upload_image_from
 from PIL import Image
 
+# Define Logger
+logger = logging.getLogger()
+logging.basicConfig()
+logger.setLevel(logging.INFO)
 app = flask.Flask(__name__)
 ws = None
 client_id = None
@@ -76,8 +81,11 @@ def invocations():
         # send res to https://newp123.free.beeceptor.com
         requests.post("https://newp123.free.beeceptor.com", data=res)
         prompt.pop("input_image")
-
+        logger.log("Image recieved"+res)
+    else:
+        logger.log("No image recieved")
     image_data = prompt_for_image_data(ws, client_id, prompt)
+
 
     # convert png to jpeg if it is allowed from accept header
     accept_jpeg = "image/jpeg" in flask.request.accept_mimetypes
