@@ -196,7 +196,8 @@ def invoke_from_prompt(prompt_file, positive_prompt, negative_prompt, seed=None,
     content_type = "application/json"
     accept = "*/*"
     payload = prompt_text
-    logger.info("Final payload to invoke sagemaker:", payload)
+    payload_str = json.dumps(payload, indent=4)
+    logger.info(f"Final payload to invoke sage maker endpoint: {payload_str}")
     logger.info(json.dumps(payload, indent=4))
     response = sagemaker_client.invoke_endpoint(
         EndpointName=endpoint_name,
