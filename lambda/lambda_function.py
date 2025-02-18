@@ -188,6 +188,7 @@ def invoke_from_prompt(prompt_file, positive_prompt, negative_prompt, seed=None,
     if image_input:
         url = image_input
         image_data = get_image_from_url(url)
+        # add a new field to the prompt_dict
         prompt_dict["input_image"] = base64.b64encode(image_data.getvalue()).decode("utf-8")
     #prompt_text = json.dumps(prompt_dict)
 

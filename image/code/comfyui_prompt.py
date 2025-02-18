@@ -113,7 +113,7 @@ def prompt_for_image_data(ws, client_id, prompt):
 def upload_image_from(image_data, name, server_address, image_type="input", overwrite=False):
     """
     Args:
-        image_data (str): The data of image to upload.
+        image_data (bytes): The image data to upload.
         name (str): The name to assign to the uploaded image.
         server_address (str): The server endpoint for uploading images.
         image_type (str, optional): The type of image. Defaults to "input".
