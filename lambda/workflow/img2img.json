@@ -77,7 +77,7 @@
   },
   "10": {
     "inputs": {
-      "image": "input.png",
+      "image": "input1.png",
       "upload": "image"
     },
     "class_type": "LoadImage"
