@@ -128,7 +128,7 @@ def upload_image_from(image_data, name, server_address, image_type="input", over
         fields={
             'image': (name, image_data, 'image/png'),  # Change MIME type if needed
             'type': image_type,
-            'overwrite': str(overwrite).lower()
+            'overwrite': True
         }
     )
 
