@@ -77,10 +77,12 @@ def invocations():
     if prompt.get("input_image"):
         logger.info("Image recieved in the request")
         image_data = prompt["input_image"]
+        file_name = prompt["file_name"]
         image_data = base64.b64decode(image_data)
-        res = upload_image_from(image_data, "input.png", SERVER_ADDRESS)
+        res = upload_image_from(image_data, file_name, SERVER_ADDRESS)
         logger.info(res)
         prompt.pop("input_image")
+        prompt.pop("file_name")
     else:
         logger.info("No image recieved in the request")
     image_data = prompt_for_image_data(ws, client_id, prompt)

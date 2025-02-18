@@ -146,7 +146,8 @@ def get_image_from_url(url):
     key = "/".join(url.split("/")[3:])
     response = boto3_client.get_object(Bucket=bucket_name, Key=key)
     file_content = io.BytesIO(response["Body"].read())
-    return file_content
+    file_name = key.split("/")[-1]
+    return file_content, file_name
 
 
 def invoke_from_prompt(prompt_file, positive_prompt, negative_prompt, seed=None, width=1024, height=1024,
@@ -187,9 +188,10 @@ def invoke_from_prompt(prompt_file, positive_prompt, negative_prompt, seed=None,
     prompt_dict = update_tensors_file_name(prompt_dict, tensors_file_name)
     if image_input:
         url = image_input
-        image_data = get_image_from_url(url)
+        image_data, file_name = get_image_from_url(url)
         # add a new field to the prompt_dict
         prompt_dict["input_image"] = base64.b64encode(image_data.getvalue()).decode("utf-8")
+        prompt_dict["file_name"] = file_name
     prompt_text = json.dumps(prompt_dict)
 
     endpoint_name = os.environ["ENDPOINT_NAME"]
