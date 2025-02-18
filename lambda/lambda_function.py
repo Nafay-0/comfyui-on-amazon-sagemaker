@@ -190,7 +190,7 @@ def invoke_from_prompt(prompt_file, positive_prompt, negative_prompt, seed=None,
         image_data = get_image_from_url(url)
         # add a new field to the prompt_dict
         prompt_dict["input_image"] = base64.b64encode(image_data.getvalue()).decode("utf-8")
-    #prompt_text = json.dumps(prompt_dict)
+    prompt_text = json.dumps(prompt_dict)
 
     endpoint_name = os.environ["ENDPOINT_NAME"]
     content_type = "application/json"
