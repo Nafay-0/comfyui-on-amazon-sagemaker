@@ -1,9 +1,3 @@
-# Modify from ComfyUI example
-# Reference: https://github.com/comfyanonymous/ComfyUI/blob/master/script_examples/websockets_api_example.py
-import requests
-#This is an example that uses the websockets api to know when a prompt execution is done
-#Once the prompt execution is done it downloads the images using the /history endpoint
-
 import websocket  # Note: websocket-client (https://github.com/websocket-client/websocket-client)
 import uuid
 import json
@@ -57,9 +51,9 @@ def get_images(ws, client_id, prompt):
             if message['type'] == 'executing':
                 data = message['data']
                 if data['node'] is None and data['prompt_id'] == prompt_id:
-                    break  #Execution is done
+                    break  # Execution is done
         else:
-            continue  #previews are binary data
+            continue  # previews are binary data
 
     history = get_history(prompt_id)[prompt_id]
     for o in history['outputs']:
@@ -79,7 +73,7 @@ def prompt_for_image_data(ws, client_id, prompt):
     """
     Execute prompt to get image data
     (only one image is returned)
-    
+
     Return dictionary:
         data: binary image in byte
         content_type: string
@@ -93,9 +87,9 @@ def prompt_for_image_data(ws, client_id, prompt):
             if message['type'] == 'executing':
                 data = message['data']
                 if data['node'] is None and data['prompt_id'] == prompt_id:
-                    break  #Execution is done
+                    break  # Execution is done
         else:
-            continue  #previews are binary data
+            continue  # previews are binary data
 
     history = get_history(prompt_id)[prompt_id]
     for o in history['outputs']:
@@ -139,23 +133,6 @@ def upload_image_from(image_data, name, server_address, image_type="input", over
     req = urllib.request.Request(upload_url, data=multipart_data, headers=headers)
     with urllib.request.urlopen(req) as response:
         return response.read().decode('utf-8')  # Decode response if it's in bytes
-
-
-def upload_image(input_path, name, server_address, image_type="input", overwrite=True):
-    with open(input_path, 'rb') as file:
-        multipart_data = MultipartEncoder(
-            fields={
-                'image': (name, file, 'image/png'),
-                'type': image_type,
-                'overwrite': str(overwrite).lower()
-            }
-        )
-
-        data = multipart_data
-        headers = {'Content-Type': multipart_data.content_type}
-        request = urllib.request.Request("http://{}/upload/image".format(server_address), data=data, headers=headers)
-        with urllib.request.urlopen(request) as response:
-            return response.read()
 
 
 prompt_text = """

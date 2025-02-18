@@ -309,11 +309,11 @@ def lambda_handler(event: dict, context: dict):
     return result
 
 
-if __name__ == "__main__":
-    import sys
-
-    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
-    event = {
-        "body": "{\"positive_prompt\": \"hill happy dog\",\"negative_prompt\": \"hill\",\"prompt_file\": \"workflow_api.json\",\"seed\": 123}"
-    }
-    lambda_handler(event, None)
+# if __name__ == "__main__":
+#     import sys
+#
+#     logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+#     event = {
+#         "body": "{\"positive_prompt\": \"hill happy dog\",\"negative_prompt\": \"hill\",\"prompt_file\": \"workflow_api.json\",\"seed\": 123}"
+#     }
+#     lambda_handler(event, None)

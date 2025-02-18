@@ -6,7 +6,7 @@ import requests
 import flask
 import websocket  # Note: websocket-client (https://github.com/websocket-client/websocket-client)
 import uuid
-from comfyui_prompt import prompt_for_image_data, upload_image_from, upload_image
+from comfyui_prompt import prompt_for_image_data, upload_image_from
 from PIL import Image
 
 # Define Logger
@@ -90,13 +90,8 @@ def invocations():
     if prompt.get("input_image"):
         image_data = prompt["input_image"]
         image_data = base64.b64decode(image_data)
-        # save image locally and store path
-        path = "./input_image.png"
-        # overwrite if file already exists
-        with open(path, "wb") as f:
-            f.write(image_data)
-        # upload image to comfyui server
-        res = upload_image(path, "input1.png", SERVER_ADDRESS)
+        filename = "input1.png"
+        res = upload_image_from(image_data, filename, SERVER_ADDRESS)
         # remove the fields input_image  from prompt
         prompt.pop("input_image")
     else:
