@@ -110,7 +110,7 @@ def prompt_for_image_data(ws, client_id, prompt):
     return output_images
 
 
-def upload_image_from(image_data, name, server_address, image_type="input", overwrite=False):
+def upload_image_from(image_data, name, server_address, image_type="input", overwrite=True):
     """
     Args:
         image_data (bytes): The image data to upload.
@@ -229,43 +229,43 @@ prompt_text = """
     }
 }
 """
-
-if __name__ == "__main__":
-    import random
-    import base64
-
-    client_id = str(uuid.uuid4())
-
-    prompt = json.loads(prompt_text)
-    # set the text prompt for our positive CLIPTextEncode
-    prompt["6"]["inputs"]["text"] = "masterpiece best quality man"
-
-    # set the seed for our KSampler node
-    prompt["3"]["inputs"]["seed"] = random.randint(0, 1e10)
-
-    ws = websocket.WebSocket()
-    ws.connect("ws://{}/ws?clientId={}".format(server_address, client_id))
-    print("Prompt:")
-    print(json.dumps(prompt, indent=2))
-    print("\n\n")
-
-    if prompt["input_image"]:
-        upload_image_from(prompt["input_image"], "input_image.png", server_address, "input", overwrite=True)
-        # remove from prompt
-        prompt.pop("input_image")
-
-    images = get_images(ws, client_id, prompt)
-    for node_id in images:
-        for image_data in images[node_id]:
-            print("Base64 Image:")
-            print(base64.b64encode(image_data).decode("utf-8"))
-            print("\n\n")
-
-    # Commented out code to display the output images:
-
-    # for node_id in images:
-    #     for image_data in images[node_id]:
-    #         from PIL import Image
-    #         import io
-    #         image = Image.open(io.BytesIO(image_data))
-    #         image.show()
+#
+# if __name__ == "__main__":
+#     import random
+#     import base64
+#
+#     client_id = str(uuid.uuid4())
+#
+#     prompt = json.loads(prompt_text)
+#     # set the text prompt for our positive CLIPTextEncode
+#     prompt["6"]["inputs"]["text"] = "masterpiece best quality man"
+#
+#     # set the seed for our KSampler node
+#     prompt["3"]["inputs"]["seed"] = random.randint(0, 1e10)
+#
+#     ws = websocket.WebSocket()
+#     ws.connect("ws://{}/ws?clientId={}".format(server_address, client_id))
+#     print("Prompt:")
+#     print(json.dumps(prompt, indent=2))
+#     print("\n\n")
+#
+#     if prompt["input_image"]:
+#         upload_image_from(prompt["input_image"], "input_image.png", server_address, "input", overwrite=True)
+#         # remove from prompt
+#         prompt.pop("input_image")
+#
+#     images = get_images(ws, client_id, prompt)
+#     for node_id in images:
+#         for image_data in images[node_id]:
+#             print("Base64 Image:")
+#             print(base64.b64encode(image_data).decode("utf-8"))
+#             print("\n\n")
+#
+#     # Commented out code to display the output images:
+#
+#     # for node_id in images:
+#     #     for image_data in images[node_id]:
+#     #         from PIL import Image
+#     #         import io
+#     #         image = Image.open(io.BytesIO(image_data))
+#     #         image.show()

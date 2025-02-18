@@ -75,17 +75,14 @@ def invocations():
 
     # if image input is provided, upload it to comfyui server
     if prompt.get("input_image"):
+        logger.info("Image recieved in the request")
         image_data = prompt["input_image"]
         image_data = base64.b64decode(image_data)
         res = upload_image_from(image_data, "input.png", SERVER_ADDRESS)
-        # send res to https://newp123.free.beeceptor.com
-        requests.post("https://newp123.free.beeceptor.com", data=res)
         prompt.pop("input_image")
-        logger.log("Image recieved"+res)
     else:
-        logger.log("No image recieved")
+        logger.info("No image recieved in the request")
     image_data = prompt_for_image_data(ws, client_id, prompt)
-
 
     # convert png to jpeg if it is allowed from accept header
     accept_jpeg = "image/jpeg" in flask.request.accept_mimetypes
