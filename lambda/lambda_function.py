@@ -86,6 +86,29 @@ def update_Sampler_details(prompt_dict, steps=20, denoise=1, cfg=8, sampler_name
     return prompt_dict
 
 
+def update_upscale_node_dimensions(prompt_dict, width, height):
+    """
+    Update the image dimensions in the prompt dictionary for the Upscale node.
+
+    Args:
+        prompt_dict (dict): The prompt dictionary containing the node information.
+        width (int): The new width value.
+        height (int): The new height value.
+
+    Returns:
+        dict: The updated prompt dictionary with the new image dimensions.
+    """
+    for node_id in prompt_dict:
+        node = prompt_dict[node_id]
+        # if node is str skip
+        if isinstance(node, str):
+            continue
+        if node.get("class_type") == "ImageScale" and "inputs" in node:
+            node["inputs"]["width"] = int(width)
+            node["inputs"]["height"] = int(height)
+    return prompt_dict
+
+
 def update_prompt_text(prompt_dict, positive_prompt, negative_prompt):
     """
     Update the prompt text in the given prompt dictionary.
@@ -202,6 +225,7 @@ def invoke_from_prompt(prompt_file, positive_prompt, negative_prompt, seed=None,
     prompt_dict = update_seed(prompt_dict, seed)
     prompt_dict = update_prompt_text(prompt_dict, positive_prompt, negative_prompt)
     prompt_dict = update_image_dimensions(prompt_dict, width, height)
+    prompt_dict = update_upscale_node_dimensions(prompt_dict, width, height)
     prompt_dict = update_Sampler_details(prompt_dict, steps, denoise, cfg, sampler_name)
     prompt_dict = update_tensors_file_name(prompt_dict, tensors_file_name)
     if image_input:
@@ -307,7 +331,6 @@ def lambda_handler(event: dict, context: dict):
         "isBase64Encoded": True,
     }
     return result
-
 
 # if __name__ == "__main__":
 #     import sys
