@@ -48,7 +48,7 @@ configure() {
     IMAGE_URI="${IMAGE_REGISTRY}/${IMAGE_REPO}:${IMAGE_TAG}"
 
     # Instance type of SageMaker endpoint
-    SAGEMAKER_INSTANCE_TYPE="ml.g5.8xlarge"
+    SAGEMAKER_INSTANCE_TYPE="ml.g5.4xlarge"
 
     # Whether to enable auto scaling for the SageMaker endpoint
     SAGEMAKER_AUTO_SCALING="false"
