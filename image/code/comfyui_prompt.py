@@ -92,6 +92,7 @@ def prompt_for_image_data(ws, client_id, prompt):
             continue  # previews are binary data
 
     history = get_history(prompt_id)[prompt_id]
+    image_data_arr = []
     for o in history['outputs']:
         for node_id in history['outputs']:
             node_output = history['outputs'][node_id]
@@ -99,7 +100,9 @@ def prompt_for_image_data(ws, client_id, prompt):
                 for image in node_output['images']:
                     # only one image is returned, other images are ignored
                     image_data = get_image_data(image['filename'], image['subfolder'], image['type'])
-                    return image_data
+                    image_data_arr.append(image_data)
+                    # return image_data
+                return image_data_arr
 
     return output_images
 

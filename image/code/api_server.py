@@ -1,4 +1,5 @@
 import base64
+import json
 import logging
 import io
 import os
@@ -96,23 +97,31 @@ def invocations():
         prompt.pop("input_image")
     else:
         logger.info("No image recieved in the request")
-    image_data = prompt_for_image_data(ws, client_id, prompt)
+    image_data_arr = prompt_for_image_data(ws, client_id, prompt)
 
-    # convert png to jpeg if it is allowed from accept header
-    accept_jpeg = "image/jpeg" in flask.request.accept_mimetypes
-    if accept_jpeg and image_data.get("content_type") == "image/png":
-        png_image = Image.open(io.BytesIO(image_data.get("data")))
-        rgb_image = png_image.convert("RGB")
-        jpeg_bytes = io.BytesIO()
-        rgb_image.save(jpeg_bytes, format="jpeg", optimize=True, quality=JPEG_QUALITY)
-        image_data["data"] = jpeg_bytes.getvalue()
-        image_data["content_type"] = "image/jpeg"
+    for image_data in image_data_arr:
+        # convert png to jpeg if it is allowed from accept header
+        accept_jpeg = "image/jpeg" in flask.request.accept_mimetypes
+        if accept_jpeg and image_data.get("content_type") == "image/png":
+            png_image = Image.open(io.BytesIO(image_data.get("data")))
+            rgb_image = png_image.convert("RGB")
+            jpeg_bytes = io.BytesIO()
+            rgb_image.save(jpeg_bytes, format="jpeg", optimize=True, quality=JPEG_QUALITY)
+            image_data["data"] = jpeg_bytes.getvalue()
+            image_data["content_type"] = "image/jpeg"
 
+    # return data for all images
     return flask.Response(
-        response=image_data.get("data", ""),
+        response=json.dumps(image_data_arr),
         status=200,
-        mimetype=image_data.get("content_type", "text/plain"),
+        mimetype="application/json",
     )
+
+    # return flask.Response(
+    #     response=image_data.get("data", ""),
+    #     status=200,
+    #     mimetype=image_data.get("content_type", "text/plain"),
+    # )
 
 
 if __name__ == "__main__":
