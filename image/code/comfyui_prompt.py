@@ -102,7 +102,7 @@ def prompt_for_image_data(ws, client_id, prompt):
                     image_data = get_image_data(image['filename'], image['subfolder'], image['type'])
                     image_data_arr.append(image_data)
                     # return image_data
-                return image_data_arr
+            return image_data_arr
 
     return output_images
 

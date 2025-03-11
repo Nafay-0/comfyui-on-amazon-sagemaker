@@ -250,6 +250,7 @@ def invoke_from_prompt(prompt_file, positive_prompt, negative_prompt, seed=None,
         Accept=accept,
         Body=payload,
     )
+    logger.info("Response: %s", json.dumps(response, indent=2))
     return response
 
 
