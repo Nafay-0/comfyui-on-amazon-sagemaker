@@ -255,20 +255,21 @@ def invoke_from_prompt(prompt_file, positive_prompt, negative_prompt, seed=None,
 
 def lambda_handler(event: dict, context: dict):
     """
-    Lambda function handler for processing events.
+    Lambda function handler for processing events and handling multiple image outputs.
 
     Args:
         event (dict): The event from lambda function URL.
         context (dict): The runtime information of the Lambda function.
 
     Returns:
-        dict: The response data for lambda function URL.
+        dict: The response data containing multiple images in base64 format.
     """
     logger.info("Event:")
     logger.info(json.dumps(event, indent=2))
     request = json.loads(event["body"])
 
     try:
+        # Extract request parameters
         prompt_file = request.get("prompt_file", "SDXL.json")
         positive_prompt = request["positive_prompt"]
         negative_prompt = request.get("negative_prompt", "")
@@ -281,6 +282,7 @@ def lambda_handler(event: dict, context: dict):
         cfg = request.get("cfg", 8)
         sampler_name = request.get("sampler_name", "euler")
         tensors_file_name = request.get("tensors_file_name", None)
+
         payload_to_send = {
             "prompt_file": prompt_file,
             "positive_prompt": positive_prompt,
@@ -295,7 +297,7 @@ def lambda_handler(event: dict, context: dict):
             "tensors_file_name": tensors_file_name,
             "image_input": image_input,
         }
-        logger.info("Payload to send", payload_to_send)
+        logger.info("Payload to send: %s", payload_to_send)
 
         response = invoke_from_prompt(
             prompt_file=prompt_file,
@@ -318,17 +320,39 @@ def lambda_handler(event: dict, context: dict):
             "body": json.dumps(
                 {
                     "error": "Missing required parameter",
+                    "details": str(e)
                 }
             ),
         }
 
-    image_data = response["Body"].read()
+    # Read and parse the response from SageMaker
+    response_data = json.loads(response["Body"].read())
 
+    # Check if we received the expected format
+    if not isinstance(response_data, dict) or "images" not in response_data:
+        logger.error("Unexpected response format from SageMaker endpoint")
+        return {
+            "statusCode": 500,
+            "body": json.dumps({
+                "error": "Invalid response format from image generation service"
+            })
+        }
+
+    # Return all images with their metadata
     result = {
-        "headers": {"Content-Type": response["ContentType"]},
         "statusCode": response["ResponseMetadata"]["HTTPStatusCode"],
-        "body": base64.b64encode(io.BytesIO(image_data).getvalue()).decode("utf-8"),
-        "isBase64Encoded": True,
+        "body": json.dumps({
+            "images": response_data["images"],
+            "total_images": response_data["total_images"],
+            "metadata": {
+                "content_type": response["ContentType"],
+                "request_id": response["ResponseMetadata"]["RequestId"]
+            }
+        }),
+        "headers": {
+            "Content-Type": "application/json",
+            "X-Total-Images": str(response_data["total_images"])
+        }
     }
     return result
 

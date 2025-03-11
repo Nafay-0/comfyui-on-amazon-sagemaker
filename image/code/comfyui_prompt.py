@@ -71,15 +71,12 @@ def get_images(ws, client_id, prompt):
 
 def prompt_for_image_data(ws, client_id, prompt):
     """
-    Execute prompt to get image data
-    (only one image is returned)
+    Execute prompt to get image data for all generated images.
 
-    Return dictionary:
-        data: binary image in byte
-        content_type: string
+    Returns:
+        list: List of dictionaries containing image data and content type
     """
     prompt_id = queue_prompt(prompt, client_id)['prompt_id']
-    output_images = {}
     while True:
         out = ws.recv()
         if isinstance(out, str):
@@ -93,19 +90,16 @@ def prompt_for_image_data(ws, client_id, prompt):
 
     history = get_history(prompt_id)[prompt_id]
     image_data_arr = []
-    for o in history['outputs']:
-        for node_id in history['outputs']:
-            node_output = history['outputs'][node_id]
-            if 'images' in node_output:
-                for image in node_output['images']:
-                    # only one image is returned, other images are ignored
-                    image_data = get_image_data(image['filename'], image['subfolder'], image['type'])
-                    image_data_arr.append(image_data)
-                    # return image_data
-            return image_data_arr
 
-    return output_images
+    # Collect all images from all output nodes
+    for node_id in history['outputs']:
+        node_output = history['outputs'][node_id]
+        if 'images' in node_output:
+            for image in node_output['images']:
+                image_data = get_image_data(image['filename'], image['subfolder'], image['type'])
+                image_data_arr.append(image_data)
 
+    return image_data_arr
 
 def upload_image_from(image_data, name, server_address, image_type="input", overwrite=True):
     """

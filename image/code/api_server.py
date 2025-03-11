@@ -63,23 +63,14 @@ def get_image_name(prompt_dict):
 @app.route("/invocations", methods=["POST"])
 def invocations():
     """
-    Handle prediction requests by transforming the input data and returning the
-    transformed data as a CSV string.
-
-    This function checks if the request content type is supported (text/csv),
-    and if so, decodes the input data, transforms it using the transform_fn
-    function, and returns the transformed data as a CSV string. If the content
-    type is not supported, a 415 status code is returned.
-
-    Returns:
-        flask.Response: A response object containing the transformed data,
-                        status code, and mimetype.
+    Handle prediction requests and return all generated images.
+    Returns a JSON array containing image data and content types for all generated images.
     """
     global ws, client_id
     if ws is None or client_id is None:
         client_id = str(uuid.uuid4())
         ws = websocket.WebSocket()
-        ws.connect("ws://{}/ws?clientId={}".format(SERVER_ADDRESS, client_id))  # nosemgrep: detect-insecure-websocket
+        ws.connect("ws://{}/ws?clientId={}".format(SERVER_ADDRESS, client_id))
 
     if DEBUG_HEADER:
         print(flask.request.headers)
@@ -93,41 +84,47 @@ def invocations():
         image_data = base64.b64decode(image_data)
         filename = "input1.png"
         res = upload_image_from(image_data, filename, SERVER_ADDRESS)
-        # remove the fields input_image  from prompt
         prompt.pop("input_image")
     else:
-        logger.info("No image recieved in the request")
+        logger.info("No image received in the request")
+
+    # Get all generated images
     image_data_arr = prompt_for_image_data(ws, client_id, prompt)
-    if len(image_data_arr) > 1:
-        logger.info("Multiple images recieved in the request")
-    else:
-        logger.info("Single image recieved in the request")
+    logger.info(f"Number of images generated: {len(image_data_arr)}")
+
+    # Process each image according to accept headers
+    processed_images = []
+    accept_jpeg = "image/jpeg" in flask.request.accept_mimetypes
 
     for image_data in image_data_arr:
-        # convert png to jpeg if it is allowed from accept header
-        accept_jpeg = "image/jpeg" in flask.request.accept_mimetypes
+        current_image = {}
+
+        # Convert PNG to JPEG if requested and possible
         if accept_jpeg and image_data.get("content_type") == "image/png":
             png_image = Image.open(io.BytesIO(image_data.get("data")))
             rgb_image = png_image.convert("RGB")
             jpeg_bytes = io.BytesIO()
             rgb_image.save(jpeg_bytes, format="jpeg", optimize=True, quality=JPEG_QUALITY)
-            image_data["data"] = jpeg_bytes.getvalue()
-            image_data["content_type"] = "image/jpeg"
+            current_image = {
+                "data": base64.b64encode(jpeg_bytes.getvalue()).decode('utf-8'),
+                "content_type": "image/jpeg"
+            }
+        else:
+            current_image = {
+                "data": base64.b64encode(image_data.get("data")).decode('utf-8'),
+                "content_type": image_data.get("content_type")
+            }
+        processed_images.append(current_image)
 
-    logger.info(f"Returning data for all images {image_data_arr}")
-
-    # return data for all images
+    # Return array of all processed images
     return flask.Response(
-        response=json.dumps(image_data_arr),
+        response=json.dumps({
+            "images": processed_images,
+            "total_images": len(processed_images)
+        }),
         status=200,
-        mimetype="application/json",
+        mimetype="application/json"
     )
-
-    # return flask.Response(
-    #     response=image_data.get("data", ""),
-    #     status=200,
-    #     mimetype=image_data.get("content_type", "text/plain"),
-    # )
 
 
 if __name__ == "__main__":
