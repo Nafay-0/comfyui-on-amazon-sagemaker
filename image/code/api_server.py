@@ -98,6 +98,10 @@ def invocations():
     else:
         logger.info("No image recieved in the request")
     image_data_arr = prompt_for_image_data(ws, client_id, prompt)
+    if len(image_data_arr) > 1:
+        logger.info("Multiple images recieved in the request")
+    else:
+        logger.info("Single image recieved in the request")
 
     for image_data in image_data_arr:
         # convert png to jpeg if it is allowed from accept header
