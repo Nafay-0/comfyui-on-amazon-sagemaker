@@ -256,13 +256,6 @@ def invoke_from_prompt(prompt_file, positive_prompt, negative_prompt, seed=None,
 def lambda_handler(event: dict, context: dict):
     """
     Lambda function handler for processing events and handling multiple image outputs.
-
-    Args:
-        event (dict): The event from lambda function URL.
-        context (dict): The runtime information of the Lambda function.
-
-    Returns:
-        dict: The response data containing multiple images in base64 format.
     """
     logger.info("Event:")
     logger.info(json.dumps(event, indent=2))
@@ -325,35 +318,42 @@ def lambda_handler(event: dict, context: dict):
             ),
         }
 
-    # Read and parse the response from SageMaker
-    response_data = json.loads(response["Body"].read())
+    # Read response body
+    response_body = response["Body"].read()
 
-    # Check if we received the expected format
-    if not isinstance(response_data, dict) or "images" not in response_data:
-        logger.error("Unexpected response format from SageMaker endpoint")
-        return {
-            "statusCode": 500,
+    try:
+        # Try to parse as JSON (new format with multiple images)
+        response_data = json.loads(response_body)
+
+        # Return all images with their metadata
+        result = {
+            "statusCode": response["ResponseMetadata"]["HTTPStatusCode"],
             "body": json.dumps({
-                "error": "Invalid response format from image generation service"
-            })
+                "images": response_data["images"],
+                "total_images": response_data["total_images"],
+                "metadata": {
+                    "content_type": response["ContentType"],
+                    "request_id": response["ResponseMetadata"]["RequestId"]
+                }
+            }),
+            "headers": {
+                "Content-Type": "application/json",
+                "X-Total-Images": str(response_data["total_images"])
+            }
+        }
+    except json.JSONDecodeError:
+        # Fall back to old format (single binary image)
+        logger.info("Falling back to single image format")
+        result = {
+            "statusCode": response["ResponseMetadata"]["HTTPStatusCode"],
+            "body": base64.b64encode(response_body).decode("utf-8"),
+            "isBase64Encoded": True,
+            "headers": {
+                "Content-Type": response["ContentType"],
+                "X-Total-Images": "1"
+            }
         }
 
-    # Return all images with their metadata
-    result = {
-        "statusCode": response["ResponseMetadata"]["HTTPStatusCode"],
-        "body": json.dumps({
-            "images": response_data["images"],
-            "total_images": response_data["total_images"],
-            "metadata": {
-                "content_type": response["ContentType"],
-                "request_id": response["ResponseMetadata"]["RequestId"]
-            }
-        }),
-        "headers": {
-            "Content-Type": "application/json",
-            "X-Total-Images": str(response_data["total_images"])
-        }
-    }
     return result
 
 # if __name__ == "__main__":
