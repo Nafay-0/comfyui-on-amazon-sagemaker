@@ -110,6 +110,8 @@ def invocations():
             image_data["data"] = jpeg_bytes.getvalue()
             image_data["content_type"] = "image/jpeg"
 
+    logger.info(f"Returning data for all images {image_data_arr}")
+
     # return data for all images
     return flask.Response(
         response=json.dumps(image_data_arr),
