@@ -171,6 +171,21 @@ def update_input_image_name(prompt_dict, input_image_name):
     return prompt_dict
 
 
+def update_sample_size(prompt_dic, n_samples):
+    if n_samples is None:
+        return prompt_dic
+    for i in prompt_dic:
+        if isinstance(prompt_dic[i], str):
+            continue
+        if "inputs" in prompt_dic[i]:
+            if (
+                    prompt_dic[i]["class_type"] == "RepeatLatentBatch"
+                    and "amount" in prompt_dic[i]["inputs"]
+            ):
+                prompt_dic[i]["inputs"]["amount"] = n_samples
+    return prompt_dic
+
+
 def get_image_from_url(url):
     """
     Get the image data from the provided URL.
@@ -192,7 +207,7 @@ def get_image_from_url(url):
 
 
 def invoke_from_prompt(prompt_file, positive_prompt, negative_prompt, seed=None, width=1024, height=1024,
-                       steps=20, denoise=1, cfg=8, sampler_name="euler", tensors_file_name=None, image_input=None):
+                       steps=20, denoise=1, cfg=8, sampler_name="euler", tensors_file_name=None, image_input=None, n_samples=None):
     """
     Invokes the SageMaker endpoint with the provided prompt data.
 
@@ -228,6 +243,7 @@ def invoke_from_prompt(prompt_file, positive_prompt, negative_prompt, seed=None,
     prompt_dict = update_upscale_node_dimensions(prompt_dict, width, height)
     prompt_dict = update_Sampler_details(prompt_dict, steps, denoise, cfg, sampler_name)
     prompt_dict = update_tensors_file_name(prompt_dict, tensors_file_name)
+    prompt_dict = update_sample_size(prompt_dict, n_samples)
     if image_input:
         url = image_input
         image_data, file_name = get_image_from_url(url)
@@ -275,6 +291,7 @@ def lambda_handler(event: dict, context: dict):
         cfg = request.get("cfg", 8)
         sampler_name = request.get("sampler_name", "euler")
         tensors_file_name = request.get("tensors_file_name", None)
+        n_samples = request.get("n_samples", None)
 
         payload_to_send = {
             "prompt_file": prompt_file,
@@ -289,6 +306,7 @@ def lambda_handler(event: dict, context: dict):
             "sampler_name": sampler_name,
             "tensors_file_name": tensors_file_name,
             "image_input": image_input,
+            "n_samples": n_samples
         }
         logger.info("Payload to send: %s", payload_to_send)
 
@@ -305,6 +323,7 @@ def lambda_handler(event: dict, context: dict):
             sampler_name=sampler_name,
             tensors_file_name=tensors_file_name,
             image_input=image_input,
+            n_samples=n_samples
         )
     except KeyError as e:
         logger.error(f"Error: {e}")
