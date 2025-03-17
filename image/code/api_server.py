@@ -78,6 +78,10 @@ def invocations():
     # get prompt from request body regardless of content type
     prompt = flask.request.get_json(silent=True, force=True)
 
+    logger.info("Prompt received in the request")
+    prompt_str = json.dumps(prompt, indent=2)
+    logger.info(prompt_str)
+
     # if image input is provided, upload it to comfyui server
     if prompt.get("input_image"):
         image_data = prompt["input_image"]
