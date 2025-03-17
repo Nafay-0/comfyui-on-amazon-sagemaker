@@ -77,7 +77,7 @@ Resources:
     Properties:
       EnableNetworkIsolation: true
       ExecutionRoleArn: !GetAtt ComfyUIModelExecutionRole.Arn
-      ModelName: !Sub "${AppName}-${ModelVersion}"
+      ModelName: !Sub "${AppName}-sync"
       PrimaryContainer:
         Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ModelEcrImage}"
         ModelDataUrl: !Sub "s3://${DeploymentBucket}/${ModelDataS3Key}"
@@ -211,7 +211,7 @@ Resources:
     Properties:
       EnableNetworkIsolation: true
       ExecutionRoleArn: !GetAtt ComfyUIModelExecutionRole.Arn
-      ModelName: !Sub "${AppName}-async-${ModelVersion}"
+      ModelName: !Sub "${AppName}-async"
       PrimaryContainer:
         Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ModelEcrImage}"
         ModelDataUrl: !Sub "s3://${DeploymentBucket}/${ModelDataS3Key}"
