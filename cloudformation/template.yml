@@ -210,11 +210,46 @@ Resources:
       FunctionName: !Ref ComfyUIFunction
       FunctionUrlAuthType: "NONE"
       Principal: "*"
+  ComfyUIAsyncModel:
+    Type: "AWS::SageMaker::Model"
+    Properties:
+      EnableNetworkIsolation: true
+      ExecutionRoleArn: !GetAtt ComfyUIModelExecutionRole.Arn
+      ModelName: !Sub "${AppName}-async-${ModelVersion}"
+      PrimaryContainer:
+        Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ModelEcrImage}"
+        ModelDataUrl: !Sub "s3://${DeploymentBucket}/${ModelDataS3Key}"
+
+  ComfyUIAsyncEndpointConfig:
+    Type: "AWS::SageMaker::EndpointConfig"
+    Properties:
+      EndpointConfigName: !Sub "${AppName}-async-${ModelVersion}"
+      ProductionVariants:
+        - VariantName: "AsyncVariant"
+          ModelName: !GetAtt ComfyUIAsyncModel.ModelName
+          InitialInstanceCount: 1
+          InstanceType: !Ref SageMakerInstanceType
+          ContainerStartupHealthCheckTimeoutInSeconds: 1200
+      AsyncInferenceConfig:
+        OutputConfig:
+          S3OutputPath: !Sub "s3://${DeploymentBucket}/async-outputs"
+        ClientConfig:
+          MaxConcurrentInvocationsPerInstance: 2
+        # Optionally define notifications (SNS/SQS) here
+
+  ComfyUIAsyncEndpoint:
+    Type: "AWS::SageMaker::Endpoint"
+    Properties:
+      EndpointName: !Sub "${AppName}-async"
+      EndpointConfigName: !GetAtt ComfyUIAsyncEndpointConfig.EndpointConfigName
 
 Outputs:
   ComfyUIFunctionUrl:
-    Description: Function URL of Lambda function
+    Description: URL of the Lambda function
     Value: !GetAtt ComfyUIFunctionUrl.FunctionUrl
-  ComfyUIEndpoint:
-    Description: Arn of SageMaker inference endpoint
+  ComfyUISyncEndpoint:
+    Description: ARN of synchronous SageMaker endpoint
     Value: !Ref ComfyUIEndpoint
+  ComfyUIAsyncEndpoint:
+    Description: ARN of asynchronous SageMaker endpoint
+    Value: !Ref ComfyUIAsyncEndpoint
