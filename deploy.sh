@@ -117,10 +117,12 @@ prepare_s3() {
     # Create the bucket
     aws s3 mb "s3://$S3_BUCKET" --region "$AWS_DEFAULT_REGION"
 
+    aws s3 mb s3://comfyui-on-sagemaker/async-outputs --region us-east-1
+
     # Enable bucket encryption with AWS-managed KMS key
     aws s3api put-bucket-encryption --bucket "$S3_BUCKET" --server-side-encryption-configuration '{"Rules": [{"ApplyServerSideEncryptionByDefault": {"SSEAlgorithm": "aws:kms", "KMSMasterKeyID": "alias/aws/s3"}}]}'
 
-    echo "Bucket created: $S3_BUCKET"
+    echo "Buckets created: $S3_BUCKET"
 }
 
 # Login to ECR
