@@ -11,7 +11,33 @@ import io
 server_address = "127.0.0.1:8188"
 
 
+def convert_prompt_format(prompt):
+    # check if prompt is a string
+    if isinstance(prompt, str):
+        prompt = json.loads(prompt)
+
+    # Create an empty dictionary to hold the converted format
+    converted_prompt = {}
+
+    # Iterate over each item in the original prompt
+    for key, value in prompt.items():
+        if isinstance(value, dict) and "class_type" in value:
+            # If the item is a dictionary and contains class_type, it's part of the expected structure
+            # Copy the dictionary with its class_type and inputs
+            converted_prompt[key] = {
+                "class_type": value["class_type"],
+                "inputs": value["inputs"]
+            }
+        elif isinstance(value, dict):
+            # If it's not the expected structure, we assume it's a general key-value pair (like seed, positive_prompt, negative_prompt)
+            converted_prompt[key] = value
+
+    # Return the converted dictionary
+    return converted_prompt
+
+
 def queue_prompt(prompt, client_id):
+    prompt = convert_prompt_format(prompt)
     p = {"prompt": prompt, "client_id": client_id}
     data = json.dumps(p).encode('utf-8')
     req = urllib.request.Request("http://{}/prompt".format(server_address), data=data)
@@ -100,6 +126,7 @@ def prompt_for_image_data(ws, client_id, prompt):
                 image_data_arr.append(image_data)
 
     return image_data_arr
+
 
 def upload_image_from(image_data, name, server_address, image_type="input", overwrite=True):
     """
