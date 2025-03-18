@@ -88,8 +88,7 @@ Resources:
       EndpointConfigName: !Sub "${AppName}-${ModelVersion}"
       ProductionVariants:
         - VariantName: !Sub "${AppName}-${ModelVersion}"
-          # Use the model’s logical ID; !Ref returns the ModelName defined in the resource.
-          ModelName: !Ref ComfyUIModel
+          ModelName: !Ref ComfyUIModel  # This references the ModelName correctly
           ContainerStartupHealthCheckTimeoutInSeconds: 600
           InitialInstanceCount: 1
           InstanceType: !Sub "${SageMakerInstanceType}"
