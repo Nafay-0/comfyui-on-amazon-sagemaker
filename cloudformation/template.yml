@@ -64,19 +64,7 @@ Resources:
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonSageMakerFullAccess
-      Policies:
-        - PolicyName: !Sub "${AppName}-sagemaker-async-policy"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:PutObject
-                  - s3:GetObject
-                  - s3:ListBucket
-                Resource:
-                  - !Sub "arn:aws:s3:::${DeploymentBucket}/async-outputs"
-                  - !Sub "arn:aws:s3:::${DeploymentBucket}/async-outputs/*"
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
 
   ComfyUIAsyncModel:
     Type: "AWS::SageMaker::Model"
