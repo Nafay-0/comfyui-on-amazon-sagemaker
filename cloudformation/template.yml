@@ -89,7 +89,7 @@ Resources:
       ProductionVariants:
         - VariantName: !Sub "${AppName}-${ModelVersion}"
           # Use the model’s logical ID; !Ref returns the ModelName defined in the resource.
-          ModelName: !Ref ComfyUIModel.ModelName
+          ModelName: !Ref ComfyUIModel
           ContainerStartupHealthCheckTimeoutInSeconds: 600
           InitialInstanceCount: 1
           InstanceType: !Sub "${SageMakerInstanceType}"
