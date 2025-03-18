@@ -77,7 +77,7 @@ Resources:
     Properties:
       EnableNetworkIsolation: true
       ExecutionRoleArn: !GetAtt ComfyUIModelExecutionRole.Arn
-      ModelName: !Sub "${AppName}-sync"
+      ModelName: !Sub "${AppName}-${ModelVersion}"
       PrimaryContainer:
         Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ModelEcrImage}"
         ModelDataUrl: !Sub "s3://${DeploymentBucket}/${ModelDataS3Key}"
@@ -89,7 +89,7 @@ Resources:
       ProductionVariants:
         - VariantName: !Sub "${AppName}-${ModelVersion}"
           # Use the model’s logical ID; !Ref returns the ModelName defined in the resource.
-          ModelName: !Ref ComfyUIModel
+          ModelName: !Ref ComfyUIModel.ModelName
           ContainerStartupHealthCheckTimeoutInSeconds: 600
           InitialInstanceCount: 1
           InstanceType: !Sub "${SageMakerInstanceType}"
@@ -211,7 +211,7 @@ Resources:
     Properties:
       EnableNetworkIsolation: true
       ExecutionRoleArn: !GetAtt ComfyUIModelExecutionRole.Arn
-      ModelName: !Sub "comfy-async-model"
+      ModelName: !Sub "${AppName}-async-${ModelVersion}"
       PrimaryContainer:
         Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ModelEcrImage}"
         ModelDataUrl: !Sub "s3://${DeploymentBucket}/${ModelDataS3Key}"
@@ -221,7 +221,7 @@ Resources:
     Properties:
       EndpointConfigName: !Sub "comfyui-async-config"
       ProductionVariants:
-        - VariantName: "AsyncVariant"
+        - VariantName: !Sub "${AppName}-async-${ModelVersion}"
           ModelName: !GetAtt ComfyUIAsyncModel.ModelName
           InitialInstanceCount: 1
           InstanceType: !Ref SageMakerInstanceType
@@ -236,7 +236,7 @@ Resources:
   ComfyUIAsyncEndpoint:
     Type: "AWS::SageMaker::Endpoint"
     Properties:
-      EndpointName: !Sub "comfy-async-end"
+      EndpointName: !Sub "${AppName}-async"
       EndpointConfigName: !GetAtt ComfyUIAsyncEndpointConfig.EndpointConfigName
 
 Outputs:
