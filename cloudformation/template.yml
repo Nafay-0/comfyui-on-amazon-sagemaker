@@ -222,7 +222,7 @@ Resources:
       EndpointConfigName: !Sub "comfyui-async-config"
       ProductionVariants:
         - VariantName: "AsyncVariant"
-          ModelName: !Ref ComfyUIAsyncModel
+          ModelName: !GetAtt ComfyUIAsyncModel.ModelName
           InitialInstanceCount: 1
           InstanceType: !Ref SageMakerInstanceType
           ContainerStartupHealthCheckTimeoutInSeconds: 1200
