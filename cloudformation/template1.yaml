@@ -43,6 +43,13 @@ Parameters:
       - ml.g6.24xlarge
       - ml.g6.48xlarge
     Default: ml.g5.4xlarge
+  SageMakerAutoScaling:
+    Type: String
+    Description: Whether to enable auto scaling for the SageMaker endpoint
+    AllowedValues:
+      - true
+      - false
+    Default: false
   LambdaUrlAuthType:
     Type: String
     AllowedValues:
@@ -51,9 +58,12 @@ Parameters:
     Default: AWS_IAM
 
 Conditions:
-  # This condition currently always evaluates to true.
-  EnableAutoScaling: !Equals [ "true", "true" ]
-  LambdaUrlAuthTypeIsNone: !Equals [ !Ref LambdaUrlAuthType, "NONE" ]
+  LambdaUrlAuthTypeIsNone: !Equals
+    - !Ref LambdaUrlAuthType
+    - NONE
+  EnableAutoScaling: !Equals
+    - !Ref SageMakerAutoScaling
+    - true
 
 Resources:
   ComfyUIModelExecutionRole:
@@ -71,6 +81,15 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonSageMakerFullAccess
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
 
+  ComfyUIAsyncModel:
+    Type: "AWS::SageMaker::Model"
+    Properties:
+      EnableNetworkIsolation: true
+      ExecutionRoleArn: !GetAtt ComfyUIModelExecutionRole.Arn
+      ModelName: !Sub "${AppName}-async-${ModelVersion}"
+      PrimaryContainer:
+        Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ModelEcrImage}"
+        ModelDataUrl: !Sub "s3://${DeploymentBucket}/${ModelDataS3Key}"
 
   ComfyUIModel:
     Type: "AWS::SageMaker::Model"
@@ -80,27 +99,24 @@ Resources:
       ModelName: !Sub "${AppName}-${ModelVersion}"
       PrimaryContainer:
         Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ModelEcrImage}"
-        ModelDataUrl: !Sub "s3://${DeploymentBucket}/${ModelDataS3Key}"
-
+        ModelDataUrl: !Sub s3://${DeploymentBucket}/${ModelDataS3Key}
   ComfyUIEndpointConfig:
     Type: "AWS::SageMaker::EndpointConfig"
     Properties:
       EndpointConfigName: !Sub "${AppName}-${ModelVersion}"
       ProductionVariants:
         - VariantName: !Sub "${AppName}-${ModelVersion}"
-          ModelName: !Ref ComfyUIModel  # This references the ModelName correctly
+          ModelName: !GetAtt ComfyUIModel.ModelName
           ContainerStartupHealthCheckTimeoutInSeconds: 600
           InitialInstanceCount: 1
           InstanceType: !Sub "${SageMakerInstanceType}"
           RoutingConfig:
             RoutingStrategy: LEAST_OUTSTANDING_REQUESTS
-
   ComfyUIEndpoint:
     Type: "AWS::SageMaker::Endpoint"
     Properties:
       EndpointName: !Sub "${AppName}"
       EndpointConfigName: !GetAtt ComfyUIEndpointConfig.EndpointConfigName
-
   ComfyUIScalingPolicy:
     Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
     DependsOn: ComfyUIEndpoint
@@ -121,7 +137,6 @@ Resources:
         ScaleInCooldown: 1800
         ScaleOutCooldown: 1800
         DisableScaleIn: false
-
   ComfyUIScalableTarget:
     Type: "AWS::ApplicationAutoScaling::ScalableTarget"
     DependsOn: ComfyUIEndpoint
@@ -129,7 +144,7 @@ Resources:
     Properties:
       MaxCapacity: 3
       MinCapacity: 1
-      ResourceId: !Sub "endpoint/${ComfyUIEndpoint}/variant/${AppName}-${ModelVersion}"
+      ResourceId: !Sub "endpoint/${ComfyUIEndpoint.EndpointName}/variant/${AppName}-${ModelVersion}"
       ScalableDimension: sagemaker:variant:DesiredInstanceCount
       ServiceNamespace: sagemaker
       # Optional: Uncomment below to define autoscaling capacity according to schedule
@@ -144,7 +159,6 @@ Resources:
       #       MaxCapacity: 3
       #       MinCapacity: 1
       #     Schedule: cron(0 4 * * ? *)
-
   ComfyUIFunctionRole:
     Type: "AWS::IAM::Role"
     DependsOn: ComfyUIEndpoint
@@ -167,9 +181,8 @@ Resources:
               - Effect: Allow
                 Action:
                   - sagemaker:InvokeEndpoint
-                # Use the full ARN for the endpoint
-                Resource: !Sub "arn:aws:sagemaker:${AWS::Region}:${AWS::AccountId}:endpoint/${AppName}"
-
+                Resource: !Ref ComfyUIEndpoint
+                #Resource: !Sub "arn:aws:sagemaker:${AWS::Region}:${AWS::AccountId}:endpoint/${AppName}"
   ComfyUIFunction:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -186,16 +199,13 @@ Resources:
         S3Key: !Sub "${LambdaPackageS3Key}"
       Environment:
         Variables:
-          # Use !Ref to get the endpoint name.
-          ENDPOINT_NAME: !Ref ComfyUIEndpoint
-
+          ENDPOINT_NAME: !GetAtt ComfyUIEndpoint.EndpointName
   ComfyUIFunctionUrl:
     Type: "AWS::Lambda::Url"
     Properties:
       AuthType: !If [ LambdaUrlAuthTypeIsNone, "NONE", "AWS_IAM" ]
       InvokeMode: BUFFERED
       TargetFunctionArn: !GetAtt ComfyUIFunction.Arn
-
   ComfyUIFunctionUrlPermission:
     Type: "AWS::Lambda::Permission"
     Condition: LambdaUrlAuthTypeIsNone
@@ -205,22 +215,12 @@ Resources:
       FunctionUrlAuthType: "NONE"
       Principal: "*"
 
-  ComfyUIAsyncModel:
-    Type: "AWS::SageMaker::Model"
-    Properties:
-      EnableNetworkIsolation: true
-      ExecutionRoleArn: !GetAtt ComfyUIModelExecutionRole.Arn
-      ModelName: !Sub "${AppName}-async-${ModelVersion}"
-      PrimaryContainer:
-        Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ModelEcrImage}"
-        ModelDataUrl: !Sub "s3://${DeploymentBucket}/${ModelDataS3Key}"
-
   ComfyUIAsyncEndpointConfig:
     Type: "AWS::SageMaker::EndpointConfig"
     Properties:
-      EndpointConfigName: !Sub "comfyui-async-config"
+      EndpointConfigName: !Sub "${AppName}-async-${ModelVersion}"
       ProductionVariants:
-        - VariantName: !Sub "${AppName}-async-${ModelVersion}"
+        - VariantName: "AsyncVariant"
           ModelName: !GetAtt ComfyUIAsyncModel.ModelName
           InitialInstanceCount: 1
           InstanceType: !Ref SageMakerInstanceType
@@ -239,12 +239,12 @@ Resources:
       EndpointConfigName: !GetAtt ComfyUIAsyncEndpointConfig.EndpointConfigName
 
 Outputs:
+  ComfyUIAsyncEndpoint:
+    Description: ARN of asynchronous SageMaker endpoint
+    Value: !Ref ComfyUIAsyncEndpoint
   ComfyUIFunctionUrl:
-    Description: Lambda Function URL
+    Description: Function URL of Lambda function
     Value: !GetAtt ComfyUIFunctionUrl.FunctionUrl
   ComfyUIEndpoint:
-    Description: ARN of the SageMaker inference endpoint
+    Description: Arn of SageMaker inference endpoint
     Value: !Ref ComfyUIEndpoint
-  ComfyUIAsyncEndpoint:
-    Description: ARN of the asynchronous SageMaker endpoint
-    Value: !Ref ComfyUIAsyncEndpoint

@@ -1,28 +1,35 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: >-
-  CloudFormation template for ComfyUI on Amazon SageMaker with synchronous and asynchronous endpoints
+  CloudFormation template for ComfyUI on Amazon SageMaker
 
 Parameters:
   AppName:
     Type: String
+    Description: Application name prefix for resources provisioned
     Default: comfyui
   DeploymentBucket:
     Type: String
+    Description: Bucket name of deployment files
     Default: comfyui-on-sagemaker
   LambdaPackageS3Key:
     Type: String
+    Description: S3 object key of Lambda function package
     Default: lambda.zip
   ModelVersion:
     Type: String
+    Description: Suffix for SageMaker model and endpoint config
     Default: default
   ModelDataS3Key:
     Type: String
+    Description: S3 object key of model data
     Default: model-data-comfyui-default.tgz
   ModelEcrImage:
     Type: String
+    Description: Image location where the inference code image is stored in Amazon ECR
     Default: comfyui-inference:default
   SageMakerInstanceType:
     Type: String
+    Description: Instance type of SageMaker endpoint
     AllowedValues:
       - ml.g4dn.xlarge
       - ml.g4dn.2xlarge
@@ -42,7 +49,7 @@ Parameters:
       - ml.g6.12xlarge
       - ml.g6.24xlarge
       - ml.g6.48xlarge
-    Default: ml.g5.4xlarge
+    Default: ml.g5.xlarge
   SageMakerAutoScaling:
     Type: String
     Description: Whether to enable auto scaling for the SageMaker endpoint
@@ -52,6 +59,7 @@ Parameters:
     Default: false
   LambdaUrlAuthType:
     Type: String
+    Description: Authentication type for the Lambda URL
     AllowedValues:
       - NONE
       - AWS_IAM
@@ -79,18 +87,6 @@ Resources:
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonSageMakerFullAccess
-        - arn:aws:iam::aws:policy/AmazonS3FullAccess
-
-  ComfyUIAsyncModel:
-    Type: "AWS::SageMaker::Model"
-    Properties:
-      EnableNetworkIsolation: true
-      ExecutionRoleArn: !GetAtt ComfyUIModelExecutionRole.Arn
-      ModelName: !Sub "${AppName}-async-${ModelVersion}"
-      PrimaryContainer:
-        Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ModelEcrImage}"
-        ModelDataUrl: !Sub "s3://${DeploymentBucket}/${ModelDataS3Key}"
-
   ComfyUIModel:
     Type: "AWS::SageMaker::Model"
     Properties:
@@ -191,7 +187,7 @@ Resources:
       Role: !GetAtt ComfyUIFunctionRole.Arn
       Runtime: python3.12
       MemorySize: 256
-      Timeout: 120
+      Timeout : 120
       Architectures:
         - arm64
       Code:
@@ -203,7 +199,7 @@ Resources:
   ComfyUIFunctionUrl:
     Type: "AWS::Lambda::Url"
     Properties:
-      AuthType: !If [ LambdaUrlAuthTypeIsNone, "NONE", "AWS_IAM" ]
+      AuthType: !If [LambdaUrlAuthTypeIsNone, "NONE", "AWS_IAM"]
       InvokeMode: BUFFERED
       TargetFunctionArn: !GetAtt ComfyUIFunction.Arn
   ComfyUIFunctionUrlPermission:
@@ -215,33 +211,7 @@ Resources:
       FunctionUrlAuthType: "NONE"
       Principal: "*"
 
-  ComfyUIAsyncEndpointConfig:
-    Type: "AWS::SageMaker::EndpointConfig"
-    Properties:
-      EndpointConfigName: !Sub "${AppName}-async-${ModelVersion}"
-      ProductionVariants:
-        - VariantName: "AsyncVariant"
-          ModelName: !GetAtt ComfyUIAsyncModel.ModelName
-          InitialInstanceCount: 1
-          InstanceType: !Ref SageMakerInstanceType
-          ContainerStartupHealthCheckTimeoutInSeconds: 1200
-      AsyncInferenceConfig:
-        OutputConfig:
-          S3OutputPath: !Sub "s3://${DeploymentBucket}/async-outputs/"
-          KmsKeyId: "alias/aws/s3"
-        ClientConfig:
-          MaxConcurrentInvocationsPerInstance: 2
-
-  ComfyUIAsyncEndpoint:
-    Type: "AWS::SageMaker::Endpoint"
-    Properties:
-      EndpointName: !Sub "${AppName}-async"
-      EndpointConfigName: !GetAtt ComfyUIAsyncEndpointConfig.EndpointConfigName
-
 Outputs:
-  ComfyUIAsyncEndpoint:
-    Description: ARN of asynchronous SageMaker endpoint
-    Value: !Ref ComfyUIAsyncEndpoint
   ComfyUIFunctionUrl:
     Description: Function URL of Lambda function
     Value: !GetAtt ComfyUIFunctionUrl.FunctionUrl
